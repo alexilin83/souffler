@@ -36,14 +36,24 @@ function text(data) {
 function space() {
     return text(' ');
 }
+function listen(node, event, handler, options) {
+    node.addEventListener(event, handler, options);
+    return () => node.removeEventListener(event, handler, options);
+}
 function attr(node, attribute, value) {
     if (value == null)
         node.removeAttribute(attribute);
     else if (node.getAttribute(attribute) !== value)
         node.setAttribute(attribute, value);
 }
+function to_number(value) {
+    return value === '' ? null : +value;
+}
 function children(element) {
     return Array.from(element.childNodes);
+}
+function set_input_value(input, value) {
+    input.value = value == null ? '' : value;
 }
 
 let current_component;
@@ -253,4 +263,4 @@ class SvelteComponent {
     }
 }
 
-export { SvelteComponent as S, append as a, attr as b, binding_callbacks as c, detach as d, element as e, insert as f, space as g, init as i, noop as n, onMount as o, safe_not_equal as s };
+export { SvelteComponent as S, append as a, attr as b, binding_callbacks as c, detach as d, element as e, insert as f, set_input_value as g, space as h, init as i, listen as l, noop as n, onMount as o, run_all as r, safe_not_equal as s, to_number as t };
