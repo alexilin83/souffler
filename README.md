@@ -1,6 +1,6 @@
-# New Project
+# Суфлер
 
-> ✨ Bootstrapped with Create Snowpack App (CSA).
+Прокрутка текста при чтении
 
 ## Available Scripts
 
