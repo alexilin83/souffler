@@ -30,6 +30,12 @@ function insert(target, node, anchor) {
 function detach(node) {
     node.parentNode.removeChild(node);
 }
+function destroy_each(iterations, detaching) {
+    for (let i = 0; i < iterations.length; i += 1) {
+        if (iterations[i])
+            iterations[i].d(detaching);
+    }
+}
 function element(name) {
     return document.createElement(name);
 }
@@ -55,8 +61,16 @@ function to_number(value) {
 function children(element) {
     return Array.from(element.childNodes);
 }
+function set_data(text, data) {
+    data = '' + data;
+    if (text.wholeText !== data)
+        text.data = data;
+}
 function set_input_value(input, value) {
     input.value = value == null ? '' : value;
+}
+function toggle_class(element, name, toggle) {
+    element.classList[toggle ? 'add' : 'remove'](name);
 }
 
 let current_component;
@@ -258,4 +272,4 @@ class SvelteComponent {
     }
 }
 
-export { SvelteComponent, action_destroyer, append, attr, binding_callbacks, detach, element, init, insert, listen, noop, run_all, safe_not_equal, set_input_value, space, to_number };
+export { SvelteComponent, action_destroyer, append, attr, binding_callbacks, destroy_each, detach, element, init, insert, listen, noop, run_all, safe_not_equal, set_data, set_input_value, space, text, to_number, toggle_class };

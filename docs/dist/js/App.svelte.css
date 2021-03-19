@@ -1,0 +1,29 @@
+.text.svelte-17g2cr5.svelte-17g2cr5{
+  padding-top:40%;
+  line-height:9rem
+}
+
+.checked.svelte-17g2cr5+span.svelte-17g2cr5:not(.checked){
+  -webkit-animation:svelte-17g2cr5-blink 1s linear infinite;
+          animation:svelte-17g2cr5-blink 1s linear infinite
+}
+
+@-webkit-keyframes svelte-17g2cr5-blink{
+  0%{
+    opacity:0
+  }
+
+  50%{
+    opacity:1
+  }
+}
+
+@keyframes svelte-17g2cr5-blink{
+  0%{
+    opacity:0
+  }
+
+  50%{
+    opacity:1
+  }
+}

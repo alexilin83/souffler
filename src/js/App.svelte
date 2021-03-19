@@ -1,6 +1,24 @@
+<style>
+    .text {
+        padding-top: 40%;
+        line-height: 9rem;
+    }
+    .checked + span:not(.checked) {
+        animation: blink 1s linear infinite;
+    }
+    @keyframes blink {
+        0% {
+            opacity: 0;
+        }
+        50% {
+            opacity: 1;
+        }
+    }
+</style>
+
 <div class="container mx-auto h-screen flex flex-wrap">
     {#if !audioCtx}
-        <button class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-red-500 px-4 py-2 text-white rounded-lg" on:click={start}>Начать</button>
+        <button class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-red-500 px-4 py-2 text-white rounded-lg" on:click={start}>Начать</button>
     {:else}
         <div class="relative w-full h-1/6 flex-initial bg-gray-500 text-white">
             <canvas use:canvas></canvas>
@@ -8,11 +26,29 @@
                 <input type="range" min="0" max="200" bind:value={sensivity} step="100">
             </div>
         </div>
-        <div class="w-full h-5/6 flex-initial overflow-y-auto p-4 xl:p-8 bg-gray-100 text-5xl xl:text-8xl" bind:this={text}>Lorem ipsum dolor sit amet consectetur adipisicing elit. Dicta quas laudantium quaerat voluptas, laborum maxime dolore nostrum perferendis quam obcaecati aspernatur doloribus facere tempore dolorum doloremque. Quibusdam est sapiente, temporibus nam veniam hic enim facilis soluta! Nulla laudantium dolores non soluta eveniet! Beatae quidem, quis, in reiciendis id fuga quo esse, iure ullam dolorum ipsum fugit doloremque modi ab? Commodi accusamus totam maxime culpa natus ullam sit dolorum voluptatem ut. Adipisci, voluptates nobis dignissimos eos, nostrum similique non blanditiis alias facilis cumque ducimus neque recusandae reiciendis maxime possimus earum quia obcaecati quidem accusantium et ipsam. Natus sunt totam adipisci placeat iusto voluptate saepe cumque incidunt unde ratione temporibus nobis accusantium, animi labore mollitia modi quaerat harum inventore ullam ab, facilis consectetur, enim commodi! Doloribus nisi modi dolore voluptatibus in recusandae unde dignissimos qui neque dolorem accusamus tempore sint a, placeat nihil ipsum accusantium voluptatem enim quas, incidunt itaque quia adipisci commodi! Totam tempora autem, vitae corrupti enim ad laborum magnam. Doloribus qui, iste nobis facere omnis earum nisi quod. Tempore sequi, alias ipsum pariatur placeat, corporis sint adipisci sunt eveniet explicabo quibusdam. Neque, possimus amet similique mollitia, officia modi distinctio quae, quaerat dolore quo eligendi porro dolores inventore doloremque hic vero. Pariatur veniam ipsum iste dolorem perspiciatis eos ea, vel eaque necessitatibus sunt itaque amet ratione esse saepe perferendis neque dolor odio fugit dolores optio. Libero, reiciendis quia dolor distinctio velit earum! Autem, reprehenderit incidunt harum eius neque accusamus quibusdam, alias quidem excepturi libero saepe voluptatem est nostrum quasi asperiores doloribus in sapiente cumque molestiae? Inventore accusantium amet deserunt veritatis ducimus incidunt beatae tempora quae ipsum repellat voluptatem perspiciatis officia enim earum explicabo necessitatibus, adipisci natus reprehenderit harum nihil! Natus doloribus similique unde possimus quidem voluptate ipsam, expedita qui, nihil vitae cumque non at saepe cum. Nemo iste laudantium nostrum?</div>
+        <div class="text w-full h-5/6 flex-initial flex-wrap overflow-y-auto p-4 xl:p-8 bg-gray-100 text-5xl xl:text-8xl" bind:this={text}>
+            {#each wordsArr as item}
+                <span class="relative inline-block mr-5 mb-5 p-5 leading-none" class:checked={item.checked} class:bg-red-500={item.marked}>{item.word}</span>
+            {/each}
+        </div>
     {/if}
 </div>
 
 <script>
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+    const SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent;
+
+    const data = 'Повседневная практика показывает, что рамки и место обучения кадров обеспечивает широкому кругу (специалистов) участие в формировании позиций, занимаемых участниками в отношении поставленных задач. Не следует, однако забывать, что укрепление и развитие структуры обеспечивает широкому кругу (специалистов) участие в формировании дальнейших направлений развития. Товарищи! консультация с широким активом играет важную роль в формировании модели развития. Повседневная практика показывает, что консультация с широким активом требуют от нас анализа новых предложений. Разнообразный и богатый опыт начало повседневной работы по формированию позиции в значительной степени обуславливает создание дальнейших направлений развития. Не следует, однако забывать, что укрепление и развитие структуры играет важную роль в формировании систем массового участия.';
+    const dataArr = data.split(' ');
+    let wordsArr = dataArr.map(item => {
+        return {
+            word: item.replace(/[^а-я\d\s]+/gi, ""),
+            checked: false,
+            marked: false
+        }
+    });
+
     let audioCtx;
     let analyser;
     let source;
@@ -25,6 +61,10 @@
     let dataArrayAlt;
     let volume;
     let sensivity = 100;
+
+    let grammar;
+    let recognition;
+    let speechRecognitionList;
 
     function start() {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -39,10 +79,82 @@
             source.connect(analyser);
 
             visualize();
+
+            recognition.start();
         })
         .catch(function(err) {
             console.error(err);
         });
+
+        grammar = '#JSGF V1.0; grammar words; public <word> = ' + dataArr.join(' | ') + ' ;';
+
+        recognition = new SpeechRecognition();
+        speechRecognitionList = new SpeechGrammarList();
+        speechRecognitionList.addFromString(grammar, 1);
+
+        recognition.grammars = speechRecognitionList;
+        recognition.lang = 'ru-RU';
+        recognition.interiumResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.addEventListener('start', function() {
+            console.log('start');
+        });
+        recognition.addEventListener('end', function() {
+            console.log('end');
+
+            recognition.start();
+        });
+        recognition.addEventListener('audiostart', function() {
+            console.log('audio start');
+        });
+        recognition.addEventListener('audioend', function() {
+            console.log('audio end');
+        });
+        recognition.addEventListener('soundstart', function() {
+            console.log('sound start');
+        });
+        recognition.addEventListener('soundend', function() {
+            console.log('sound end');
+        });
+        recognition.addEventListener('speechstart', function() {
+            console.log('speech start');
+        });
+        recognition.addEventListener('speechend', function() {
+            console.log('speech end');
+        });
+        recognition.addEventListener('result', function(event) {
+            console.log('result');
+
+            const last = event.results.length - 1;
+            let curWords = event.results[last][0].transcript.split(' ');
+            console.log(curWords);
+            console.log(event.results[0][0].confidence);
+
+            highlightWords(curWords);
+        });
+        
+        recognition.addEventListener('nomatch', function(event) {
+            console.log("Can't recognise text.");
+        });
+        recognition.addEventListener('error', function(event) {
+            console.error(`Error occurred in recognition: ${event.error}`);
+        });
+    }
+
+    function highlightWords(arr) {
+        wordsArr = wordsArr.map(item => {
+            if (!item.checked && arr.length) {
+                if (item.word.toLowerCase() === arr[0]) {
+                    item = {...item, checked: true, marked: true};
+                } else {
+                    item = {...item, checked: true};
+                }
+                arr.shift();
+            }
+            return item;
+        });
+        console.log(wordsArr);
     }
 
     function canvas(node) {
