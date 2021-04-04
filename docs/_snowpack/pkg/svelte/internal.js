@@ -17,6 +17,9 @@ function safe_not_equal(a, b) {
 function is_empty(obj) {
     return Object.keys(obj).length === 0;
 }
+function null_to_empty(value) {
+    return value == null ? '' : value;
+}
 function action_destroyer(action_result) {
     return action_result && is_function(action_result.destroy) ? action_result.destroy : noop;
 }
@@ -272,4 +275,4 @@ class SvelteComponent {
     }
 }
 
-export { SvelteComponent, action_destroyer, append, attr, binding_callbacks, destroy_each, detach, element, init, insert, listen, noop, run_all, safe_not_equal, set_data, set_input_value, space, text, to_number, toggle_class };
+export { SvelteComponent, action_destroyer, append, attr, binding_callbacks, destroy_each, detach, element, init, insert, listen, noop, null_to_empty, run_all, safe_not_equal, set_data, set_input_value, space, text, to_number, toggle_class };

@@ -28,7 +28,7 @@
         </div>
         <div class="text w-full h-5/6 flex-initial flex-wrap overflow-y-auto xl:p-8 bg-gray-100 text-2xl xl:text-6xl" bind:this={text}>
             {#each wordsArr as item}
-                <span class="relative inline-block mr-1 mb-1 py-3 px-5 xl:px-10 rounded-3xl leading-none xl:leading-normal transition-all duration-300" class:checked={item.checked} class:bg-red-300={item.marked}>{item.word}</span>
+                <span class={`relative inline-block mr-1 mb-1 py-3 px-5 xl:px-10 rounded-3xl leading-none xl:leading-normal transition-all duration-300 ${item.marked ? "bg-red-300" : ''}`} class:checked={item.checked}>{item.word}</span>
             {/each}
         </div>
     {/if}

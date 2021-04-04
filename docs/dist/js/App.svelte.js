@@ -13,6 +13,7 @@ import {
 	insert,
 	listen,
 	noop,
+	null_to_empty,
 	run_all,
 	safe_not_equal,
 	set_data,
@@ -170,14 +171,14 @@ function create_each_block(ctx) {
 	let span;
 	let t_value = /*item*/ ctx[28].word + "";
 	let t;
+	let span_class_value;
 
 	return {
 		c() {
 			span = element("span");
 			t = text_1(t_value);
-			attr(span, "class", "relative inline-block mr-1 mb-1 py-3 px-5 xl:px-10 rounded-3xl leading-none xl:leading-normal transition-all duration-300 svelte-1w0po35");
+			attr(span, "class", span_class_value = "" + (null_to_empty(`relative inline-block mr-1 mb-1 py-3 px-5 xl:px-10 rounded-3xl leading-none xl:leading-normal transition-all duration-300 ${/*item*/ ctx[28].marked ? "bg-red-300" : ""}`) + " svelte-1w0po35"));
 			toggle_class(span, "checked", /*item*/ ctx[28].checked);
-			toggle_class(span, "bg-red-300", /*item*/ ctx[28].marked);
 		},
 		m(target, anchor) {
 			insert(target, span, anchor);
@@ -186,12 +187,12 @@ function create_each_block(ctx) {
 		p(ctx, dirty) {
 			if (dirty & /*wordsArr*/ 1 && t_value !== (t_value = /*item*/ ctx[28].word + "")) set_data(t, t_value);
 
-			if (dirty & /*wordsArr*/ 1) {
-				toggle_class(span, "checked", /*item*/ ctx[28].checked);
+			if (dirty & /*wordsArr*/ 1 && span_class_value !== (span_class_value = "" + (null_to_empty(`relative inline-block mr-1 mb-1 py-3 px-5 xl:px-10 rounded-3xl leading-none xl:leading-normal transition-all duration-300 ${/*item*/ ctx[28].marked ? "bg-red-300" : ""}`) + " svelte-1w0po35"))) {
+				attr(span, "class", span_class_value);
 			}
 
-			if (dirty & /*wordsArr*/ 1) {
-				toggle_class(span, "bg-red-300", /*item*/ ctx[28].marked);
+			if (dirty & /*wordsArr, wordsArr*/ 1) {
+				toggle_class(span, "checked", /*item*/ ctx[28].checked);
 			}
 		},
 		d(detaching) {
