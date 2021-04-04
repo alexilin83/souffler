@@ -1,9 +1,9 @@
 <style>
     .text {
         padding-top: 40%;
-        line-height: 9rem;
     }
     .checked + span:not(.checked) {
+        background: grey;
         animation: blink 1s linear infinite;
     }
     @keyframes blink {
@@ -26,9 +26,9 @@
                 <input type="range" min="0" max="200" bind:value={sensivity} step="100">
             </div>
         </div>
-        <div class="text w-full h-5/6 flex-initial flex-wrap overflow-y-auto p-4 xl:p-8 bg-gray-100 text-5xl xl:text-8xl" bind:this={text}>
+        <div class="text w-full h-5/6 flex-initial flex-wrap overflow-y-auto xl:p-8 bg-gray-100 text-2xl xl:text-6xl" bind:this={text}>
             {#each wordsArr as item}
-                <span class="relative inline-block mr-5 mb-5 p-5 leading-none" class:checked={item.checked} class:bg-red-500={item.marked}>{item.word}</span>
+                <span class="relative inline-block mr-1 mb-1 py-3 px-5 xl:px-10 rounded-3xl leading-none xl:leading-normal transition-all duration-300" class:checked={item.checked} class:bg-red-300={item.marked}>{item.word}</span>
             {/each}
         </div>
     {/if}
@@ -60,7 +60,7 @@
     let bufferLengthAlt;
     let dataArrayAlt;
     let volume;
-    let sensivity = 100;
+    let sensivity = 0;
 
     let grammar;
     let recognition;
@@ -89,21 +89,19 @@
         grammar = '#JSGF V1.0; grammar words; public <word> = ' + dataArr.join(' | ') + ' ;';
 
         recognition = new SpeechRecognition();
-        speechRecognitionList = new SpeechGrammarList();
-        speechRecognitionList.addFromString(grammar, 1);
+        // speechRecognitionList = new SpeechGrammarList();
+        // speechRecognitionList.addFromString(grammar, 1);
 
-        recognition.grammars = speechRecognitionList;
+        // recognition.grammars = speechRecognitionList;
         recognition.lang = 'ru-RU';
-        recognition.interiumResults = false;
-        recognition.maxAlternatives = 1;
+        recognition.continuous = true;
+        recognition.interimResults = true;
 
         recognition.addEventListener('start', function() {
             console.log('start');
         });
         recognition.addEventListener('end', function() {
             console.log('end');
-
-            recognition.start();
         });
         recognition.addEventListener('audiostart', function() {
             console.log('audio start');
@@ -126,12 +124,22 @@
         recognition.addEventListener('result', function(event) {
             console.log('result');
 
-            const last = event.results.length - 1;
-            let curWords = event.results[last][0].transcript.split(' ');
-            console.log(curWords);
-            console.log(event.results[0][0].confidence);
-
-            highlightWords(curWords);
+            for (var i = event.resultIndex; i < event.results.length; ++i) {
+                let curWordsStr = event.results[i][0].transcript;
+                if (curWordsStr.charAt(0) === ' ') {
+                    curWordsStr = curWordsStr.substring(1);
+                }
+                let curWords = curWordsStr.split(' ');
+                if (event.results[i].isFinal) {
+                    setCheckedWords(curWords);
+                } else {
+                    let confidence = event.results[i][0].confidence; 
+                    if (confidence > 0.85) {
+                        highlightWords(curWords);
+                    }
+                }
+            }
+            
         });
         
         recognition.addEventListener('nomatch', function(event) {
@@ -146,6 +154,18 @@
         wordsArr = wordsArr.map(item => {
             if (!item.checked && arr.length) {
                 if (item.word.toLowerCase() === arr[0]) {
+                    item = {...item, marked: true};
+                }
+                arr.shift();
+            }
+            return item;
+        });
+    }
+
+    function setCheckedWords(arr) {
+        wordsArr = wordsArr.map(item => {
+            if (!item.checked && arr.length) {
+                if (item.word.toLowerCase() === arr[0]) {
                     item = {...item, checked: true, marked: true};
                 } else {
                     item = {...item, checked: true};
@@ -154,7 +174,6 @@
             }
             return item;
         });
-        console.log(wordsArr);
     }
 
     function canvas(node) {

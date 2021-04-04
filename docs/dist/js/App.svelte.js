@@ -25,7 +25,7 @@ import {
 
 function get_each_context(ctx, list, i) {
 	const child_ctx = ctx.slice();
-	child_ctx[27] = list[i];
+	child_ctx[28] = list[i];
 	return child_ctx;
 }
 
@@ -68,7 +68,7 @@ function create_else_block(ctx) {
 			attr(input, "step", "100");
 			attr(div0, "class", "absolute top-0 right-0 p-2");
 			attr(div1, "class", "relative w-full h-1/6 flex-initial bg-gray-500 text-white");
-			attr(div2, "class", "text w-full h-5/6 flex-initial flex-wrap overflow-y-auto p-4 xl:p-8 bg-gray-100 text-5xl xl:text-8xl svelte-17g2cr5");
+			attr(div2, "class", "text w-full h-5/6 flex-initial flex-wrap overflow-y-auto xl:p-8 bg-gray-100 text-2xl xl:text-6xl svelte-1w0po35");
 		},
 		m(target, anchor) {
 			insert(target, div1, anchor);
@@ -168,30 +168,30 @@ function create_if_block(ctx) {
 // (30:12) {#each wordsArr as item}
 function create_each_block(ctx) {
 	let span;
-	let t_value = /*item*/ ctx[27].word + "";
+	let t_value = /*item*/ ctx[28].word + "";
 	let t;
 
 	return {
 		c() {
 			span = element("span");
 			t = text_1(t_value);
-			attr(span, "class", "relative inline-block mr-5 mb-5 p-5 leading-none svelte-17g2cr5");
-			toggle_class(span, "checked", /*item*/ ctx[27].checked);
-			toggle_class(span, "bg-red-500", /*item*/ ctx[27].marked);
+			attr(span, "class", "relative inline-block mr-1 mb-1 py-3 px-5 xl:px-10 rounded-3xl leading-none xl:leading-normal transition-all duration-300 svelte-1w0po35");
+			toggle_class(span, "checked", /*item*/ ctx[28].checked);
+			toggle_class(span, "bg-red-300", /*item*/ ctx[28].marked);
 		},
 		m(target, anchor) {
 			insert(target, span, anchor);
 			append(span, t);
 		},
 		p(ctx, dirty) {
-			if (dirty & /*wordsArr*/ 1 && t_value !== (t_value = /*item*/ ctx[27].word + "")) set_data(t, t_value);
+			if (dirty & /*wordsArr*/ 1 && t_value !== (t_value = /*item*/ ctx[28].word + "")) set_data(t, t_value);
 
 			if (dirty & /*wordsArr*/ 1) {
-				toggle_class(span, "checked", /*item*/ ctx[27].checked);
+				toggle_class(span, "checked", /*item*/ ctx[28].checked);
 			}
 
 			if (dirty & /*wordsArr*/ 1) {
-				toggle_class(span, "bg-red-500", /*item*/ ctx[27].marked);
+				toggle_class(span, "bg-red-300", /*item*/ ctx[28].marked);
 			}
 		},
 		d(detaching) {
@@ -270,7 +270,7 @@ function instance($$self, $$props, $$invalidate) {
 	let bufferLengthAlt;
 	let dataArrayAlt;
 	let volume;
-	let sensivity = 100;
+	let sensivity = 0;
 	let grammar;
 	let recognition;
 	let speechRecognitionList;
@@ -290,12 +290,14 @@ function instance($$self, $$props, $$invalidate) {
 
 		grammar = "#JSGF V1.0; grammar words; public <word> = " + dataArr.join(" | ") + " ;";
 		recognition = new SpeechRecognition();
-		speechRecognitionList = new SpeechGrammarList();
-		speechRecognitionList.addFromString(grammar, 1);
-		recognition.grammars = speechRecognitionList;
+
+		// speechRecognitionList = new SpeechGrammarList();
+		// speechRecognitionList.addFromString(grammar, 1);
+		// recognition.grammars = speechRecognitionList;
 		recognition.lang = "ru-RU";
-		recognition.interiumResults = false;
-		recognition.maxAlternatives = 1;
+
+		recognition.continuous = true;
+		recognition.interimResults = true;
 
 		recognition.addEventListener("start", function () {
 			console.log("start");
@@ -303,7 +305,6 @@ function instance($$self, $$props, $$invalidate) {
 
 		recognition.addEventListener("end", function () {
 			console.log("end");
-			recognition.start();
 		});
 
 		recognition.addEventListener("audiostart", function () {
@@ -332,11 +333,26 @@ function instance($$self, $$props, $$invalidate) {
 
 		recognition.addEventListener("result", function (event) {
 			console.log("result");
-			const last = event.results.length - 1;
-			let curWords = event.results[last][0].transcript.split(" ");
-			console.log(curWords);
-			console.log(event.results[0][0].confidence);
-			highlightWords(curWords);
+
+			for (var i = event.resultIndex; i < event.results.length; ++i) {
+				let curWordsStr = event.results[i][0].transcript;
+
+				if (curWordsStr.charAt(0) === " ") {
+					curWordsStr = curWordsStr.substring(1);
+				}
+
+				let curWords = curWordsStr.split(" ");
+
+				if (event.results[i].isFinal) {
+					setCheckedWords(curWords);
+				} else {
+					let confidence = event.results[i][0].confidence;
+
+					if (confidence > 0.85) {
+						highlightWords(curWords);
+					}
+				}
+			}
 		});
 
 		recognition.addEventListener("nomatch", function (event) {
@@ -352,6 +368,20 @@ function instance($$self, $$props, $$invalidate) {
 		$$invalidate(0, wordsArr = wordsArr.map(item => {
 			if (!item.checked && arr.length) {
 				if (item.word.toLowerCase() === arr[0]) {
+					item = { ...item, marked: true };
+				}
+
+				arr.shift();
+			}
+
+			return item;
+		}));
+	}
+
+	function setCheckedWords(arr) {
+		$$invalidate(0, wordsArr = wordsArr.map(item => {
+			if (!item.checked && arr.length) {
+				if (item.word.toLowerCase() === arr[0]) {
 					item = { ...item, checked: true, marked: true };
 				} else {
 					item = { ...item, checked: true };
@@ -362,8 +392,6 @@ function instance($$self, $$props, $$invalidate) {
 
 			return item;
 		}));
-
-		console.log(wordsArr);
 	}
 
 	function canvas(node) {

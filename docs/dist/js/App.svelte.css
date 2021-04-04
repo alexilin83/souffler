@@ -1,14 +1,14 @@
-.text.svelte-17g2cr5.svelte-17g2cr5{
-  padding-top:40%;
-  line-height:9rem
+.text.svelte-1w0po35.svelte-1w0po35{
+  padding-top:40%
 }
 
-.checked.svelte-17g2cr5+span.svelte-17g2cr5:not(.checked){
-  -webkit-animation:svelte-17g2cr5-blink 1s linear infinite;
-          animation:svelte-17g2cr5-blink 1s linear infinite
+.checked.svelte-1w0po35+span.svelte-1w0po35:not(.checked){
+  background:grey;
+  -webkit-animation:svelte-1w0po35-blink 1s linear infinite;
+          animation:svelte-1w0po35-blink 1s linear infinite
 }
 
-@-webkit-keyframes svelte-17g2cr5-blink{
+@-webkit-keyframes svelte-1w0po35-blink{
   0%{
     opacity:0
   }
@@ -18,7 +18,7 @@
   }
 }
 
-@keyframes svelte-17g2cr5-blink{
+@keyframes svelte-1w0po35-blink{
   0%{
     opacity:0
   }
