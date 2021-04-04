@@ -306,6 +306,7 @@ function instance($$self, $$props, $$invalidate) {
 
 		recognition.addEventListener("end", function () {
 			console.log("end");
+			recognition.start();
 		});
 
 		recognition.addEventListener("audiostart", function () {
