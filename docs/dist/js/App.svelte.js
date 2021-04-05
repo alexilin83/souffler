@@ -338,11 +338,7 @@ function instance($$self, $$props, $$invalidate) {
 
 			for (var i = event.resultIndex; i < event.results.length; ++i) {
 				let curWordsStr = event.results[i][0].transcript;
-
-				if (curWordsStr.charAt(0) === " ") {
-					curWordsStr = curWordsStr.substring(1);
-				}
-
+				curWordsStr.trim();
 				let curWords = curWordsStr.split(" ");
 
 				if (event.results[i].isFinal) {
